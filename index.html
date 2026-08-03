@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Java Snippet Bench — 33 Programs</title>
+<style>
+  :root{
+    --bg: #0d1117;
+    --panel: #12181f;
+    --panel-2: #161d26;
+    --line: #232c37;
+    --text: #d3dbe4;
+    --dim: #7d8b9a;
+    --accent: #ffb454;   /* amber, like a terminal cursor */
+    --accent-2: #6fd3a3;  /* mint, for output/success */
+    --danger: #ff6b6b;
+    --code-kw: #ff9f68;
+    --code-str: #a3d977;
+    --code-type: #7ec8e3;
+    --mono: "SF Mono", "JetBrains Mono", "Fira Code", ui-monospace, Menlo, Consolas, monospace;
+    --sans: -apple-system, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --tag-bg: #1c2530;
+  }
+
+  * { box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 60px;
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(13,17,23,0.92);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+    padding: 14px 16px 12px;
+  }
+  .brand-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 10px;
+  }
+  .brand{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+  }
+  .brand .dot{
+    width:9px;height:9px;border-radius:50%;
+    background: var(--accent);
+    display:inline-block;
+    box-shadow: 0 0 8px var(--accent);
+  }
+  .brand h1{
+    font-family: var(--mono);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    margin:0;
+    color: #fff;
+  }
+  .brand h1 span{ color: var(--accent); }
+  .counter{
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--dim);
+    border: 1px solid var(--line);
+    padding: 3px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .search-wrap{
+    margin-top: 12px;
+    position: relative;
+  }
+  #search{
+    width:100%;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 14px;
+    padding: 10px 12px 10px 32px;
+    border-radius: 10px;
+    outline: none;
+  }
+  #search:focus{ border-color: var(--accent); }
+  .search-wrap::before{
+    content: "⌕";
+    position:absolute;
+    left: 10px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--dim);
+    font-size: 16px;
+  }
+
+  .filters{
+    display:flex;
+    gap:6px;
+    overflow-x:auto;
+    margin-top: 10px;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+  .filters::-webkit-scrollbar{ display:none; }
+  .chip{
+    flex: 0 0 auto;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--dim);
+    background: var(--tag-bg);
+    border: 1px solid var(--line);
+    padding: 5px 10px;
+    border-radius: 20px;
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+  }
+  .chip.active{
+    color: #0d1117;
+    background: var(--accent);
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* ---------- List ---------- */
+  main{ padding: 16px 12px 0; max-width: 720px; margin: 0 auto; }
+
+  .empty-state{
+    display:none;
+    text-align:center;
+    color: var(--dim);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 60px 20px;
+  }
+
+  .card{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+
+  .card-head{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    padding: 13px 14px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .idx{
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--bg);
+    background: var(--accent);
+    min-width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight: 700;
+    flex-shrink:0;
+  }
+  .head-text{ flex: 1; min-width:0; }
+  .head-title{
+    font-size: 14.5px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .head-tag{
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--dim);
+  }
+  .chevron{
+    color: var(--dim);
+    font-size: 12px;
+    transition: transform 0.2s ease;
+    flex-shrink:0;
+  }
+  .card.open .chevron{ transform: rotate(90deg); color: var(--accent); }
+
+  .card-body{
+    display:none;
+    padding: 0 14px 16px;
+    border-top: 1px solid var(--line);
+  }
+  .card.open .card-body{ display:block; padding-top: 12px; }
+
+  .section-label{
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--dim);
+    margin: 14px 0 6px;
+  }
+  .section-label:first-child{ margin-top: 0; }
+
+  pre.code{
+    background: #0a0e13;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px;
+    overflow-x: auto;
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.6;
+    -webkit-overflow-scrolling: touch;
+  }
+  pre.code code{ color: var(--text); white-space: pre; }
+  .kw{ color: var(--code-kw); }
+  .str{ color: var(--code-str); }
+  .typ{ color: var(--code-type); }
+  .cm{ color: #5c6b7a; font-style: italic; }
+
+  .output-box{
+    background: #0a1410;
+    border: 1px solid #1d3327;
+    border-left: 3px solid var(--accent-2);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--accent-2);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .explain{
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--text);
+    margin: 0;
+  }
+  .explain b{ color: #fff; }
+  .explain code{
+    font-family: var(--mono);
+    background: var(--tag-bg);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--code-type);
+  }
+
+  footer{
+    text-align:center;
+    color: var(--dim);
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 30px 20px 10px;
+  }
+
+  /* toolbar buttons */
+  .toolbar{
+    display:flex;
+    gap: 8px;
+    margin: 14px 0 4px;
+  }
+  .tbtn{
+    flex:1;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--dim);
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    padding: 8px 0;
+    border-radius: 8px;
+    text-align:center;
+    cursor:pointer;
+    user-select:none;
+  }
+  .tbtn:active{ background: var(--tag-bg); }
+
+  @media (min-width: 480px){
+    .head-title{ font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand-row">
+    <div class="brand">
+      <span class="dot"></span>
+      <h1>Java<span>Bench</span></h1>
+    </div>
+    <div class="counter" id="counter">33 programs</div>
+  </div>
+  <div class="search-wrap">
+    <input id="search" type="text" placeholder="Search: anagram, palindrome, thread…" autocomplete="off">
+  </div>
+  <div class="filters" id="filters"></div>
+</header>
+
+<main>
+  <div class="toolbar">
+    <div class="tbtn" id="expandAll">Expand all</div>
+    <div class="tbtn" id="collapseAll">Collapse all</div>
+  </div>
+
+  <div id="list"></div>
+  <div class="empty-state" id="emptyState">No matches. Try a different search term.</div>
+</main>
+
+<footer>Quick-reference bench · tap a card to expand · 33/33 indexed</footer>
+
+<script>
+// ---------------------------------------------------------------
+// Data: 33 Java snippets extracted from the source PDF
+// tags: array | string | recursion | oop | collections | exception | thread | pattern
+// ---------------------------------------------------------------
+const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+function hl(code){
+  // Single-pass tokenizer: walks the raw source once, so matched tokens
+  // (comments/strings/keywords/types) can never get re-matched or corrupted
+  // by a later pass, and every other character is escaped exactly as-is.
+  const kws = ["class","public","static","void","int","char","boolean","String","if","else","for","while","new","return","import","try","catch","throw","throws","extends","implements","interface","protected","true","false","this"];
+  const types = ["System","Arrays","Collections","Integer","Thread","Runnable","Scanner","Exception","LinkedHashMap","LinkedHashSet","HashSet","List","ArrayList","Set","Map","StringBuilder"];
+
+  const pattern = new RegExp(
+    "(//.*)" +                              // group1: line comment
+    "|(\"(?:[^\"\\\\]|\\\\.)*\")" +         // group2: string literal
+    "|\\b(" + kws.join("|") + ")\\b" +      // group3: keyword
+    "|\\b(" + types.join("|") + ")\\b",     // group4: type/class name
+    "g"
+  );
+
+  let result = "";
+  let lastIndex = 0;
+  let m;
+  while ((m = pattern.exec(code)) !== null) {
+    result += esc(code.slice(lastIndex, m.index));
+    if (m[1] !== undefined)      result += `<span class="cm">${esc(m[1])}</span>`;
+    else if (m[2] !== undefined) result += `<span class="str">${esc(m[2])}</span>`;
+    else if (m[3] !== undefined) result += `<span class="kw">${esc(m[3])}</span>`;
+    else if (m[4] !== undefined) result += `<span class="typ">${esc(m[4])}</span>`;
+    lastIndex = pattern.lastIndex;
+  }
+  result += esc(code.slice(lastIndex));
+  return result;
+}
+
+const data = [
+{ title:"Anagram Check", tag:"string", code:
+`// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+import java.util.*;
+class Main {
+    public static void main(String[] args) {
+        String S1="listen";
+        String S2="silent";
+
+        char [] a= S1.toCharArray();
+        char [] b=S2.toCharArray();
+
+        Arrays.sort(a);
+
+        Arrays.sort(b);
+
+        if(Arrays.equals(a,b)){
+            System.out.print("Anagram");
+        }else{
+            System.out.print("Not an Anagram");
+        }
+    }
+}`,
+output:"Anagram",
+explain:`Converts both strings to char arrays, sorts each with <code>Arrays.sort()</code>, then compares them using <code>Arrays.equals()</code>. Two words are anagrams if they contain the exact same letters — sorting makes that easy to check, since sorted anagrams become identical arrays.`
+},
+{ title:"Armstrong Number", tag:"math", code:
+`// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+
+class Main {
+    public static void main(String[] args) {
+    int num = 153;
+    int temp = num;
+    int sum = 0;
+
+    while (num > 0) {
+        int digit = num % 10;
+        sum = sum + (digit * digit * digit);
+        num = num / 10;
+    }
+
+    if (sum == temp) {
+        System.out.println("Armstrong Number");
+    } else {
+        System.out.println("Not Armstrong Number");
+    }
+    }
+}`,
+output:"Armstrong Number",
+explain:`Extracts each digit with <code>num % 10</code>, cubes it, and adds it to <code>sum</code>, then removes that digit with <code>num / 10</code>. If the total of the cubed digits equals the original number, it's an Armstrong number. 153 = 1³ + 5³ + 3³.`
+},
+{ title:"Consecutive Character Check", tag:"string", code:
+`// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+import java.util.*;
+class Main {
+    public static void main(String[] args) {
+        System.out.print(Check("bba"));
+    }
+    public static boolean Check(String Vals){
+
+        int [] count = new int[26];
+
+        for(char ch : Vals.toCharArray()){
+            count[ch-'a']++;
+        }
+
+        for (int i=0;i<26;i++){
+            if(count[i] > 0 && count[i] != i + 1) {
+            return false;
+            }
+        }
+        return true;
+    }
+}`,
+output:"true",
+explain:`Counts frequency of each letter a–z into <code>count[26]</code> using <code>ch-'a'</code> as the index. Then checks a quirky rule: whenever a letter appears, its frequency must equal its position + 1 (a→1 time, b→2 times, etc). For "bba": 'a' appears once (matches i=0→1) and 'b' appears twice (matches i=1→2), so it returns <code>true</code>.`
+},
+{ title:"Binary Search", tag:"array", code:
+`// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+
+class BinarySearch {
+    public static void main(String[] args) {
+        int [] a={1,2,3,4,5};
+        int find=3;
+
+        int low=0;
+        int high=a.length-1;
+        while(low <= high){
+            int mid=(low+high)/2;
+            if(a[mid]==find){
+                System.out.print("Match Found index of =="+mid);
+            }
+            if(find>a[mid]){
+                low=mid+1;
+            }else{
+                high=mid-1;
+            }
+        }
+    }
+}`,
+output:"Match Found index of ==2",
+explain:`Classic divide-and-conquer search on a sorted array. Repeatedly checks the middle element; if the target is larger, search moves right (<code>low=mid+1</code>), if smaller, it moves left (<code>high=mid-1</code>). Finds 3 at index 2 in O(log n) time.`
+},
+{ title:"Count Each Character Occurrence", tag:"string", code:
+`// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+
+class Main {
+    public static void main(String[] args) {
+
+        String str = "banana";
+
+        for (char ch = 'a'; ch <= 'z'; ch++) {
+
+            int count = str.length() - str.replace(ch + "", "").length();
+
+            if (count > 0) {
+                System.out.println(ch + " = " + count);
+            }
+        }
+    }
+
+}`,
+output:"a = 3\nb = 1\nn = 2",
+explain:`Loops through every letter a–z. For each letter, <code>str.replace(ch + "", "")</code> removes all its occurrences, so the difference in length before/after tells you how many times that letter appeared. A neat replace-based trick that avoids manual counting arrays.`
+},
+{ title:"Count Occurrences of a Target Value", tag:"array", code:
+`// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+
+class Main {
+    public static void main(String[] args) {
+        int[] numbers = {1, 2, 5, 5, 5, 8, 9};
+        int target=5;
+        int count=0;
+        for(int num:numbers){
+            if(num==target){
+                count++;
+            }
+        }
+        System.out.print("Target--"+target+"   "+"Count--"+count);
+    }
+}`,
+output:"Target--5   Count--3",
+explain:`Simple linear scan with an enhanced for-loop: increments <code>count</code> every time the current element matches <code>target</code>. Straightforward O(n) counting pattern used constantly in array problems.`
+},
+{ title:"Count Words and Letters in a Sentence", tag:"string", code:
+`// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+
+class Main {
+    public static void main(String[] args) {
+        String Sentence="Hello world Madam";
+        // Count Words
+        String[] words = Sentence.trim().split("\\\\s+");
+        int wordslength=words.length;
+        // Count Letters
+        int lenghthcount=0;
+        for(int i=0;i<Sentence.length();i++){
+            if(Sentence.charAt(i)!=' '){
+                lenghthcount++;
+            }
+        }
+        System.out.println("Words--"+wordslength);
+        System.out.println("Numbers--"+lenghthcount);
+    }
+}`,
+output:"Words--3\nNumbers--15",
+explain:`<code>split("\\\\s+")</code> breaks the sentence into words on any run of whitespace, giving the word count. Separately, the loop counts every non-space character to get the total letter count — 15 letters across "Hello", "world", "Madam".`
+},
+{ title:"Custom Exception (Age Validation)", tag:"exception", code:
+`// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+
+class Main {
+    public static void main(String[] args) {
+        try {
+            checkAge(0);
+        } catch (CustomException e) {
+            System.out.println("Exception: " + e.getMessage());
+        }
+    }
+    static void checkAge(int age) throws CustomException {
+        if (age < 18) {
+            throw new CustomException("Age must be 18 or above");
+        } else {
+            System.out.println("Eligible to vote");
+        }
+    }
+}
+class CustomException extends Exception {
+    public CustomException(String message){
+        super(message);
+    }
+}`,
+output:"Exception: Age must be 18 or above",
+explain:`Defines a custom checked exception by extending <code>Exception</code> and passing the message up via <code>super(message)</code>. The method declares <code>throws CustomException</code>, and the caller wraps the call in <code>try/catch</code> to handle validation failures gracefully instead of crashing.`
+},
+{ title:"Remove Duplicates — Preserve Order (LinkedHashSet)", tag:"collections", code:
+`// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+import java.util.*;
+class Main {
+    public static void main(String[] args) {
+    int [] Arr={1,2,3,4,6,7,8,5,7,8,5,9,2};
+    Set<Integer> set= new LinkedHashSet<>();
+    for(int num : Arr){
+        set.add(num);
+    }
+    System.out.print(set);
+    }
+}`,
+output:"[1, 2, 3, 4, 6, 7, 8, 5, 9]",
+explain:`A <code>LinkedHashSet</code> automatically drops duplicates (Set semantics) while keeping insertion order (unlike a plain <code>HashSet</code>, which doesn't guarantee order). Adding every array element into it is a one-line dedupe that preserves the original sequence.`
+},
+{ title:"Repeated Character Frequency (> 1)", tag:"string", code:
+`// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+import java.util.*;
+class Main {
+    public static void main(String[] args) {
+        String n="manojpandey";
+        for(char ch='a';ch<='z';ch++){
+            int count=n.length()-n.replace(ch+"","").length();
+            if(count>1){
+                System.out.println(ch+" = "+count);
+            }
+        }
+    }
+}`,
+output:"a = 2\nn = 2",
+explain:`Same replace-length trick as the earlier frequency counter, but this time only prints letters that repeat more than once — useful for quickly spotting which characters are duplicated in a string.`
+},
+{ title:"Remove Duplicates from a List (ArrayList + LinkedHashSet)", tag:"collections", code:
+`// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+import java.util.*;
+class Main {
+    public static void main(String[] args) {
+        List <Integer> Numbers=Arrays.asList(1,2,2,3,3,4);
+        List <Integer> Final=new ArrayList<>(new LinkedHashSet<>(Numbers
+            ));
+        System.out.print(Final);
+    }
+}`,
+output:"[1, 2, 3, 4]",
+explain:`Wraps the list into a <code>LinkedHashSet</code> to strip duplicates while keeping order, then wraps that back into an <code>ArrayList</code> since <code>Arrays.asList()</code> returns a fixed-size list that can't be modified directly. A very common one-liner dedupe idiom.`
+},
+{ title:"Find Duplicates using HashSet.add()", tag:"collections", code:
+`// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+import java.util.*;
+class Main {
+    public static void main(String[] args) {
+    int [] Arr={1,2,3,4,6,7,8,5,7,8,5,9,2};
+    Set<Integer> set= new HashSet<>();
+    for(int num : Arr){
+        if(!set.add(num)){
+        System.out.println("Duplicate----"+num);
+        }
+    }
+
+    }
+}`,
+output:"Duplicate----7\nDuplicate----8\nDuplicate----5\nDuplicate----2",
+explain:`<code>Set.add()</code> returns <code>false</code> when the element already exists in the set. That return value is used directly as the duplicate check — no separate "contains" call needed. Prints each value the second (or later) time it's seen.`
+},
+{ title:"First Unique Characters / Split Result", tag:"string", code:
+`// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+
+class Main {
+    public static void main(String[] args) {
+    String S= "Programming";
+    String result="";
+    String NonResult="";
+    for(char c: S.toCharArray()){
+        if(result.indexOf(c)==-1){
+            result+=c;
+        }else{
+            NonResult+=c+",";
+        }
+    }
+    System.out.println(result);
+    System.out.println(NonResult);
+    }
+}`,
+output:"Progamin\nr,m,g,",
+explain:`Builds up <code>result</code> with only first-seen characters (checked via <code>indexOf(c) == -1</code>), and routes any character that's already been seen into <code>NonResult</code> instead. "Programming" → first-seen letters print as "Progamin", and the repeated letters (second r, second m, second g) print as "r,m,g,".`
+},
+{ title:"Interface Implementation (Vehicle / Car)", tag:"oop", code:
+`interface Vehicle {
+    void start();
+    void stop();
+}
+
+class Car implements  Vehicle {
+    @Override
+    public void start(){
+        System.out.println("Start the Car");
+    }
+    @Override
+    public void stop(){
+        System.out.println("stop the Car");
+    }
+}
+class Main {
+    public static void main(String[] args) {
+        Vehicle v= new Car();
+        v.start();
+        v.stop();
+    }
+}`,
+output:"Start the Car\nstop the Car",
+explain:`Demonstrates polymorphism through an <code>interface</code>. <code>Car</code> provides concrete implementations of <code>start()</code> and <code>stop()</code>. Declaring the reference as <code>Vehicle v = new Car()</code> lets the code depend only on the interface contract, not the concrete class.`
+},
+{ title:"Largest Element After Sort", tag:"array", code:
+`// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+import java.util.*;
+class Main {
+    public static void main(String[] args) {
+    int [] Arr={10,20,50,90,20};
+    Arrays.sort(Arr);
+    int SecondLargest= Arr[Arr.length-1];
+    System.out.print(SecondLargest);
+    }
+}`,
+output:"90",
+explain:`After sorting ascending, the last index <code>Arr.length-1</code> holds the maximum value. ⚠️ Note: despite the variable name "SecondLargest", this actually retrieves the <b>largest</b> element — the correct second-largest index would be <code>Arr.length-2</code> (see the fixed version further down).`
+},
+{ title:"LinkedHashMap as an LRU Cache", tag:"collections", code:
+`import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+LinkedHashMap<Integer, String> cache =
+new LinkedHashMap<>(3, 0.75f, true) {
+protected boolean removeEldestEntry(Map.Entry<Integer, String> e) {
+        return size() > 3;
+    }
+};
+
+    cache.put(1, "A");
+    cache.put(2, "B");
+    cache.put(3, "C");
+
+    cache.get(1);      // use 1
+    cache.put(4, "D"); // removes 2
+
+    System.out.println(cache);
+    }
+}`,
+output:"{3=C, 1=A, 4=D}",
+explain:`The <code>true</code> flag enables access-order mode, so recently-used entries move to the end. Overriding <code>removeEldestEntry()</code> to return <code>true</code> once <code>size() > 3</code> makes the map automatically evict the least-recently-used entry — a textbook LRU cache in a few lines.`
+},
+{ title:"List Intersection (retainAll)", tag:"collections", code:
+`// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+import java.util.*;
+class Main {
+    public static void main(String[] args) {
+    List<Integer> l1=new ArrayList<>(Arrays.asList(1,2,3,4));
+    List<Integer> l2=Arrays.asList(3,4);
+    l1.retainAll(l2);
+    System.out.print(l1);
+    }
+}`,
+output:"[3, 4]",
+explain:`<code>retainAll()</code> mutates <code>l1</code> so it only keeps elements that also exist in <code>l2</code> — effectively computing the set intersection in place. <code>l1</code> must be a modifiable list, which is why it's wrapped in <code>new ArrayList<>(...)</code>.`
+},
+{ title:"First Non-Repeating Character", tag:"string", code:
+`public class Main {
+    public static void main(String[] args) {
+        String s = "programming";
+
+        for (int i = 0; i < s.length(); i++) {
+            char ch = s.charAt(i);
+
+            if (s.indexOf(ch) == s.lastIndexOf(ch)) {
+                System.out.println(ch);
+                break;
+            }
+        }
+    }
+}`,
+output:"p",
+explain:`For each character, if its first occurrence (<code>indexOf</code>) equals its last occurrence (<code>lastIndexOf</code>), it only appears once in the string — meaning it's non-repeating. The loop stops at the very first such character it finds.`
+},
+{ title:"Palindrome Check", tag:"string", code:
+`// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+
+class Main {
+    public static void main(String[] args) {
+        String str="madam";
+        String Reverse=new StringBuilder(str).reverse().toString();
+        if(str.equals(Reverse)){
+            System.out.print("Palindrome");
+        }else{
+            System.out.print("Not a Palindrome");
+        }
+    }
+}`,
+output:"Palindrome",
+explain:`Uses <code>StringBuilder.reverse()</code> to flip the string, then compares it to the original with <code>equals()</code>. If a string reads the same forwards and backwards, it's a palindrome — the cleanest way to check this in Java.`
+},
+{ title:"Negative Array Size Exception Handling", tag:"exception", code:
+`// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+import java.util.*;
+class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Hello :");
+        int marks = sc.nextInt();
+    try {
+        int[] arr = new int[marks - 44]; // Negative size if marks < 45
+        System.out.println("Pass");
+    } catch (Exception e) {
+        System.out.println("Fail");
+    }
+    }
+}`,
+output:"Hello :50\nPass",
+explain:`Deliberately creates an array with size <code>marks - 44</code>. If <code>marks</code> is below 45, the size is negative, and Java throws a <code>NegativeArraySizeException</code> at runtime — caught generically here by <code>catch (Exception e)</code>. With input 50, the size is 6 (valid), so it prints "Pass".`
+},
+{ title:"Diamond / Pyramid Letter Pattern", tag:"pattern", code:
+`// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+import java.util.*;
+class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter number of rows: ");
+        int n = sc.nextInt();
+        //Upper Part
+        for(int i=1;i<n;i++){
+            //Space
+            for(int j=n;j>i;j--){
+                System.out.print(" ");
+            }
+            //Content
+            for(char ch='A';ch<'A'+i;ch++){
+                System.out.print(ch+" ");
+            }
+            System.out.println();
+        }
+        //Lower Part
+        for(int i=n-1;i>=1;i--){
+            //Space
+            for(int j=n;j>i;j--){
+                System.out.print(" ");
+            }
+            //Content
+            for(char ch='A';ch<'A'+i;ch++){
+                System.out.print(ch+" ");
+            }
+            System.out.println();
+        }
+    }
+}`,
+output:"Enter number of rows: 10\n      A\n     A B\n    A B C\n   A B C D\n  A B C D E\n A B C D E F\nA B C D E F G\nA B C D E F G H\nA B C D E F G H I\nA B C D E F G H I J\nA B C D E F G H I\nA B C D E F G H\n A B C D E F G\n  A B C D E F\n   A B C D E\n    A B C D\n     A B C\n      A B\n       A",
+explain:`Two nested loop blocks build a diamond shape. The upper half grows the letter sequence (A, A B, A B C…) row by row while reducing leading spaces; the lower half mirrors it in reverse. Classic pattern-printing exercise combining spacing math with character increments.`
+},
+{ title:"Producer–Consumer (Simplified)", tag:"thread", code:
+`class ProducerConsumer {
+    int item;
+    boolean available = false;
+
+    void produce(int value) {
+        item = value;
+        available = true;
+        System.out.println("Produced: " + item);
+    }
+
+    void consume() {
+        if (available) {
+            System.out.println("Consumed: " + item);
+            available = false;
+        }
+    }
+
+    public static void main(String[] args) {
+        ProducerConsumer pc = new ProducerConsumer();
+
+        pc.produce(10);
+        pc.consume();
+    }
+}`,
+output:"Produced: 10\nConsumed: 10",
+explain:`A simplified (non-concurrent) sketch of the classic producer-consumer pattern. <code>produce()</code> sets a shared <code>item</code> and flips an <code>available</code> flag; <code>consume()</code> only reads the item if <code>available</code> is true, then resets the flag. A real implementation would add thread synchronization (<code>wait()</code>/<code>notify()</code> or locks).`
+},
+{ title:"Remove Duplicate Characters (keep order)", tag:"string", code:
+`// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+
+class Main {
+    public static void main(String[] args) {
+        String s = "banaans";
+String result = "";
+
+for (char c : s.toCharArray()) {
+
+    if (result.indexOf(c) == -1) {
+        result += c;
+    }
+}
+
+System.out.println(result);
+    }
+}`,
+output:"bans",
+explain:`Builds a new string one character at a time, only appending a character if it hasn't already appeared in <code>result</code> (checked via <code>indexOf</code>). This strips duplicate letters while preserving the order of first appearance.`
+},
+{ title:"Reverse an Array", tag:"array", code:
+`// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+import java.util.*;
+class Main {
+    public static void main(String[] args) {
+        int [] Arr={1,2,3,4,5};
+        int [] Reverse=new int[Arr.length];
+        for(int i=0;i< Arr.length;i++){
+            Reverse[i]=Arr[Arr.length-1-i];
+        }
+        for(int num : Reverse){
+            System.out.print(num);
+        }
+    }
+}`,
+output:"54321",
+explain:`Creates a new array the same size as the original, then fills it back-to-front: index <code>i</code> in <code>Reverse</code> gets the element from index <code>Arr.length-1-i</code> in the original. A standard non-destructive array reversal.`
+},
+{ title:"Sort Array Descending (Integer[] + Collections.reverseOrder)", tag:"array", code:
+`// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+import java.util.*;
+class Main {
+    public static void main(String[] args) {
+    Integer [] Arr={1,2,3,4,6,7,8,5,7,8,5,9,2};
+    Arrays.sort(Arr,Collections.reverseOrder());
+    for (int num : Arr){
+        System.out.print(num+",");
+    }
+    }
+}`,
+output:"9,8,8,7,7,6,5,5,4,3,2,2,1,",
+explain:`<code>Collections.reverseOrder()</code> supplies a <code>Comparator</code> that sorts largest-to-smallest. This only works with the boxed <code>Integer[]</code> type (not primitive <code>int[]</code>) because <code>Arrays.sort()</code> with a custom comparator requires objects, not primitives.`
+},
+{ title:"Rotate Digits & Divide", tag:"string", code:
+`// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+
+class Main {
+    public static void main(String[] args) {
+            int num = 123;
+        String str = String.valueOf(num);
+
+        for (int i = 0; i < str.length(); i++) {
+            // Rotate string
+            String rotated = str.substring(i) + str.substring(0, i);
+
+            // Convert to number
+            int value = Integer.parseInt(rotated);
+
+            // Divide by 3
+            int result = value / 3;
+
+            System.out.println("Rotation: " + rotated + " -> " + result);
+        }
+    }
+}`,
+output:"Rotation: 123 -> 41\nRotation: 231 -> 77\nRotation: 312 -> 104",
+explain:`Converts the number to a string, then for each index builds a rotation by concatenating the tail (<code>substring(i)</code>) with the head (<code>substring(0,i)</code>). Each rotated string is parsed back to an int and divided by 3. Demonstrates string-based rotation without manual digit math.`
+},
+{ title:"Thread via Runnable", tag:"thread", code:
+`// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+
+class Main implements Runnable {
+    public void run(){
+        System.out.println("Thread is running...");
+    }
+    public static void main(String[] args) {
+        Main M =new Main();
+        Thread t1= new Thread(M);
+        t1.start();
+    }
+}`,
+output:"Thread is running...",
+explain:`Implements the <code>Runnable</code> interface and defines the work in <code>run()</code>. A <code>Thread</code> is constructed around the runnable object and started with <code>t1.start()</code> (never call <code>run()</code> directly — that would execute synchronously on the current thread instead of a new one).`
+},
+{ title:"Correct Second-Largest Element", tag:"array", code:
+`// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+import java.util.*;
+class Main {
+    public static void main(String[] args) {
+    int [] Arr={10,20,50,90,20};
+    Arrays.sort(Arr);
+    int SecondLargest= Arr[Arr.length-2];
+    System.out.print(SecondLargest);
+    }
+}`,
+output:"50",
+explain:`This is the corrected version of the earlier snippet: after ascending sort, the second-to-last index (<code>Arr.length-2</code>) correctly holds the second-largest value, distinct from the maximum at <code>Arr.length-1</code>. Note the array has a duplicate 20, but the sorted values are still 10,20,20,50,90.`
+},
+{ title:"Sort Array Ascending", tag:"array", code:
+`// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+import java.util.*;
+class Main {
+    public static void main(String[] args) {
+    int [] Arr={1,2,3,4,6,7,8,5,7,8,5,9,2};
+     Arrays.sort(Arr);
+    for (int num : Arr){
+        System.out.print(num+",");
+    }
+    }
+}`,
+output:"1,2,2,3,4,5,5,6,7,7,8,8,9,",
+explain:`<code>Arrays.sort()</code> sorts a primitive <code>int[]</code> in place using a dual-pivot quicksort, ascending by default. The loop then prints each value followed by a comma for a simple comma-separated readout.`
+},
+{ title:"Stream Filter (Names starting with 'S')", tag:"collections", code:
+`// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+import java.util.*;
+class Main {
+    public static void main(String[] args) {
+    List<String> names = Arrays.asList("Ram", "Sam", "Tom","Sangi");
+    names.stream().filter(n -> n.startsWith("S")).forEach(System.out
+        ::println);
+    }
+}`,
+output:"Sam\nSangi",
+explain:`Uses the Streams API to declaratively filter the list: <code>filter()</code> keeps only names matching the lambda condition (<code>startsWith("S")</code>), and <code>forEach(System.out::println)</code> prints each survivor using a method reference. More concise than a manual loop with an if-check.`
+},
+{ title:"Thread via extends Thread", tag:"thread", code:
+`// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+
+class Main extends Thread {
+    public void run(){
+        System.out.print("Thread");
+    }
+    public static void main(String[] args) {
+        Main t1= new Main();
+        t1.start();
+    }
+}`,
+output:"Thread",
+explain:`The alternative way to create a thread: subclass <code>Thread</code> directly and override <code>run()</code>. Compared to implementing <code>Runnable</code>, this approach uses up Java's single-inheritance slot on <code>Thread</code>, so <code>Runnable</code> is generally preferred when the class needs to extend something else.`
+},
+{ title:"Multilevel: Inheritance + Runnable (Animal/Dog)", tag:"oop", code:
+`class Dog extends Animal implements Runnable {
+
+    @Override
+    public void run() {
+        System.out.println("Thread is running...");
+    }
+
+    public static void main(String[] args) {
+
+        Dog d = new Dog();
+
+        // Calling inherited method
+        d.sound();
+
+        // Creating a Thread object
+        Thread t = new Thread(d);
+
+        // Starting the thread
+        t.start();
+    }
+}
+class Animal {
+    void sound() {
+        System.out.println("Animal makes a sound");
+    }
+}`,
+output:"Animal makes a sound\nThread is running...",
+explain:`Combines class inheritance (<code>Dog extends Animal</code>) with interface implementation (<code>implements Runnable</code>) in a single class — Java allows extending one class while implementing multiple interfaces. <code>d.sound()</code> runs inherited behavior synchronously, while wrapping <code>d</code> in a <code>Thread</code> runs <code>run()</code> concurrently.`
+},
+{ title:"Word Frequency Counter (HashMap)", tag:"collections", code:
+`// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+import java.util.*;
+class Main {
+    public static void main(String[] args) {
+        String text = "java is fun and java is powerful";
+        Map<String,Integer>val= new HashMap<>();
+        for(String word : text.split(" ")){
+            val.put(word,val.getOrDefault(word,0)+1);
+        }
+        System.out.print(val);
+    }
+}`,
+output:"{java=2, powerful=1, and=1, is=2, fun=1}",
+explain:`Splits the sentence into words, then for each word uses <code>getOrDefault(word, 0) + 1</code> to bump its count in the map — starting at 0 for unseen words. This is the standard idiom for frequency counting in Java without manually checking <code>containsKey()</code> first. (HashMap iteration order isn't guaranteed, so key order in the output may vary.)`
+}
+];
+
+// ---------------------------------------------------------------
+// Render
+// ---------------------------------------------------------------
+const listEl = document.getElementById('list');
+const emptyEl = document.getElementById('emptyState');
+const counterEl = document.getElementById('counter');
+const filtersEl = document.getElementById('filters');
+
+const tagLabels = {
+  all:"All", array:"Arrays", string:"Strings", collections:"Collections",
+  oop:"OOP", thread:"Threads", exception:"Exceptions", math:"Math", pattern:"Patterns"
+};
+const tagsInUse = ["all", ...new Set(data.map(d=>d.tag))];
+let activeTag = "all";
+
+function renderFilters(){
+  filtersEl.innerHTML = tagsInUse.map(t =>
+    `<div class="chip ${t===activeTag?'active':''}" data-tag="${t}">${tagLabels[t]||t}</div>`
+  ).join('');
+  filtersEl.querySelectorAll('.chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      activeTag = chip.dataset.tag;
+      renderFilters();
+      renderList();
+    });
+  });
+}
+
+function renderList(){
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  listEl.innerHTML = "";
+  let shown = 0;
+
+  data.forEach((item, i) => {
+    const matchesTag = activeTag === "all" || item.tag === activeTag;
+    const haystack = (item.title + " " + item.tag + " " + item.explain + " " + item.code).toLowerCase();
+    const matchesSearch = !q || haystack.includes(q);
+    if(!matchesTag || !matchesSearch) return;
+    shown++;
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-head">
+        <div class="idx">${i+1}</div>
+        <div class="head-text">
+          <p class="head-title">${item.title}</p>
+          <p class="head-tag">${tagLabels[item.tag]||item.tag}</p>
+        </div>
+        <div class="chevron">▶</div>
+      </div>
+      <div class="card-body">
+        <div class="section-label">Code</div>
+        <pre class="code"><code>${hl(item.code)}</code></pre>
+        <div class="section-label">Output</div>
+        <div class="output-box">${esc(item.output)}</div>
+        <div class="section-label">Explanation</div>
+        <p class="explain">${item.explain}</p>
+      </div>
+    `;
+    card.querySelector('.card-head').addEventListener('click', ()=>{
+      card.classList.toggle('open');
+    });
+    listEl.appendChild(card);
+  });
+
+  counterEl.textContent = shown + " / " + data.length + " programs";
+  emptyEl.style.display = shown === 0 ? 'block' : 'none';
+}
+
+document.getElementById('search').addEventListener('input', renderList);
+document.getElementById('expandAll').addEventListener('click', ()=>{
+  document.querySelectorAll('.card').forEach(c=>c.classList.add('open'));
+});
+document.getElementById('collapseAll').addEventListener('click', ()=>{
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('open'));
+});
+
+renderFilters();
+renderList();
+</script>
+</body>
+</html>
